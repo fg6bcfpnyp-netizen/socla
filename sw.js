@@ -1,5 +1,5 @@
-// SoCla Offline-Speicher (Version 20261110-193009). Holt Dateien aus dem Internet, wenn möglich, sonst aus dem Speicher des Tablets.
-const SPEICHER = "socla-20261110-193009";
+// SoCla Offline-Speicher (Version 20261110-193623). Holt Dateien aus dem Internet, wenn möglich, sonst aus dem Speicher des Tablets.
+const SPEICHER = "socla-20261110-193623";
 const DATEIEN = ["./", "index.html", "js/daten.js", "js/grafik.js", "js/spiel.js", "manifest.webmanifest", "icon-180.png", "icon-192.png", "icon-512.png"];
 self.addEventListener("install", e => {   // jede Datei einzeln, damit eine fehlende Datei nicht alles verhindert
   e.waitUntil(caches.open(SPEICHER).then(c => Promise.all(DATEIEN.map(d => c.add(d).catch(() => null)))));
