@@ -809,7 +809,7 @@ function kaufe(i) {
   sag(`${k.e || "🛍️"} ${k.n} gekauft!`);
 }
 function oeffneTierheim(quelle) {
-  const tiere = Object.keys(K).filter(t => K[t].art === "tier");
+  const tiere = Object.keys(K).filter(t => K[t].art === "tier" && !K[t].hof);   // Bauernhof- und Strandtiere gibt es nicht im Tierheim
   oeffne(`<button class="zu" onclick="schliesse()">✖</button><h2>🐾 Tierheim <span class="klein">– Du hast ${S.sterne} ⭐</span></h2>
     <p>Diese Tiere suchen ein Zuhause. Sie freuen sich über Futter, Spielzeug und ein Körbchen!</p>
     <div class="waren">${tiere.map(t => { const k = K[t], kann = S.sterne >= k.preis; return `<div class="ware"><div class="gross">${k.e}</div><div>${k.n}</div>
