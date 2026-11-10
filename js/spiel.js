@@ -308,6 +308,8 @@ function blaettern(r) { setzeBlick(Math.round(S.blick[S.ort] / 100) * 100 + r * 
 let zug = null, hoverEl = null, randLauf = null;
 const dialogOffen = () => $("#schleier").style.display === "flex";
 document.addEventListener("pointerdown", e => {
+  if (zug) return;   // zweiter Finger, während schon gezogen wird
+  document.querySelectorAll(".geist").forEach(g => g.remove());
   if (e.button !== 0 || dialogOffen() || e.target.closest("button")) return;
   const el = e.target.closest("[data-uid]");
   const inSzene = e.target.closest("#szene");
@@ -319,9 +321,21 @@ document.addEventListener("pointerdown", e => {
     zug = {art:fest ? "fest" : "ding", uid:f.d.uid, el, sx:e.clientX, sy:e.clientY, rx:(e.clientX - r.left) / r.width, ry:(e.clientY - r.top) / r.height, bewegt:false, blick:S.blick[S.ort]};
     if (el.closest(".liegt") || el.classList.contains("tding")) { zug.rx = .5; zug.ry = .5; }
   } else if (inSzene) { e.preventDefault(); zug = {art:"pan", sx:e.clientX, sy:e.clientY, bewegt:false, blick:S.blick[S.ort]}; }
+  if (zug) zug.pid = e.pointerId;
 });
-document.addEventListener("pointermove", e => {
+// Das Tablet kann ein Ziehen abbrechen (Systemgeste, Anruf, App-Wechsel): dann alles zurücksetzen
+function zugAbbrechen() {
   if (!zug) return;
+  cancelAnimationFrame(randLauf);
+  if (zug.geist) zug.geist.remove();
+  if (hoverEl) { hoverEl.classList.remove("ziel-hover"); hoverEl = null; }
+  zug = null; zeichne();
+}
+document.addEventListener("pointercancel", e => { if (zug && e.pointerId === zug.pid) zugAbbrechen(); });
+window.addEventListener("blur", zugAbbrechen);
+document.addEventListener("visibilitychange", () => { if (document.hidden) zugAbbrechen(); });
+document.addEventListener("pointermove", e => {
+  if (!zug || e.pointerId !== zug.pid) return;
   zug.px = e.clientX; zug.py = e.clientY;
   if (!zug.bewegt) {
     if (Math.hypot(e.clientX - zug.sx, e.clientY - zug.sy) < 7) return;
@@ -335,7 +349,7 @@ document.addEventListener("pointermove", e => {
   bewegeGeist(e);
 });
 document.addEventListener("pointerup", e => {
-  if (!zug) return;
+  if (!zug || e.pointerId !== zug.pid) return;
   const z = zug; zug = null; cancelAnimationFrame(randLauf);
   if (hoverEl) { hoverEl.classList.remove("ziel-hover"); hoverEl = null; }
   if (z.art === "pan") { if (z.bewegt) speichern(); return; }
